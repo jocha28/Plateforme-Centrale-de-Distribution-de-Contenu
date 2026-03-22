@@ -34,5 +34,18 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFiles": ["./src/__tests__/setup.js"],
+    "testMatch": ["**/__tests__/**/*.test.js"],
+    "testTimeout": 10000,
+    "forceExit": true,
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/__tests__/**",
+      "!src/db/seed.js"
+    ]
   }
 }
