@@ -17,7 +17,8 @@ from typing import Optional
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Header
 from fastapi.responses import StreamingResponse, FileResponse
-from jose import JWTError, jwt
+import jwt as pyjwt
+from jwt.exceptions import InvalidTokenError
 
 from models.schemas import ReponseUpload, ReponseErreur, ReponseSuppression
 from services.media_service import sauvegarder_fichier, supprimer_fichier, extraire_metadonnees_audio, extraire_metadonnees_image
@@ -41,11 +42,11 @@ async def verifier_token_admin(authorization: Optional[str] = Header(None)):
     token = authorization.split(" ")[1]
 
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        payload = pyjwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         if payload.get("role") != "admin":
             raise HTTPException(status_code=403, detail="Droits administrateur requis.")
         return payload
-    except JWTError as e:
+    except InvalidTokenError as e:
         raise HTTPException(status_code=401, detail=f"Token invalide ou expiré : {str(e)}")
 
 
