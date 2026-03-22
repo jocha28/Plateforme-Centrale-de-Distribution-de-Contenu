@@ -1,0 +1,53 @@
+# Dépendances Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Variables d'environnement (NE JAMAIS COMMITTER)
+.env
+.env.local
+.env.production
+
+# Fichiers médias uploadés
+express-api/uploads/
+!express-api/uploads/.gitkeep
+
+# Base de données SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.venv/
+venv/
+env/
+.Python
+fastapi-service/.env
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Éditeurs
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Couverture de tests
+coverage/
+.nyc_output/
+htmlcov/
+
+# Distribution / Build
+dist/
+build/
