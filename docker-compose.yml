@@ -1,0 +1,77 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Plateforme Centrale de Distribution de Contenu
+# Lancer les deux services avec : docker-compose up --build
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── API Express principale ─────────────────────────────────────────────────
+  express-api:
+    build:
+      context: ./express-api
+      dockerfile: Dockerfile
+    container_name: plateforme_express
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET:-changer_ce_secret_jwt_en_production}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changer_ce_mot_de_passe}
+      - DB_PATH=/app/data/plateforme.db
+      - FASTAPI_URL=http://fastapi-service:8000
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
+      - MAX_UPLOAD_SIZE_MB=50
+    volumes:
+      - db_data:/app/data
+      - uploads_express:/app/uploads
+    depends_on:
+      - fastapi-service
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ── Service FastAPI médias ─────────────────────────────────────────────────
+  fastapi-service:
+    build:
+      context: ./fastapi-service
+      dockerfile: Dockerfile
+    container_name: plateforme_fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - PORT=8000
+      - HOST=0.0.0.0
+      - JWT_SECRET=${JWT_SECRET:-changer_ce_secret_jwt_en_production}
+      - UPLOAD_DIR=/app/uploads
+      - MAX_UPLOAD_MB=100
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
+      - MINIATURE_TAILLE=400
+      - JPEG_QUALITY=85
+    volumes:
+      - uploads_media:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+# ── Volumes persistants ────────────────────────────────────────────────────
+volumes:
+  db_data:
+    name: plateforme_db
+  uploads_express:
+    name: plateforme_uploads_express
+  uploads_media:
+    name: plateforme_uploads_media
